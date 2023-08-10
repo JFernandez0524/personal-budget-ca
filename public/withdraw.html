@@ -15,7 +15,7 @@
   <body>
     <div class="container">
       <header class="row">
-        <h1 class="text-center">Welcome To Budget Tracking App</h1>
+        <h1 class="text-center">Withdraw Page</h1>
         <ul class="nav nav-underline mb-5 justify-content-center">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="./index.html"
@@ -42,41 +42,23 @@
       <main>
         <div class="row d-flex justify-content-center">
           <div class="col-4 card">
-            <form>
+            <form class="form">
               <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label"
-                  >Email address</label
+                  >Withdraw Amount</label
                 >
                 <input
-                  type="email"
+                  type="number"
                   class="form-control"
-                  id="exampleInputEmail1"
-                  aria-describedby="emailHelp"
+                  id="withdraw"
+                  name="withdrawAmount"
+                  aria-describedby="withdrawAmount"
                 />
                 <div id="emailHelp" class="form-text">
-                  We'll never share your email with anyone else.
+                  Enter the amount to withdraw.
                 </div>
               </div>
-              <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label"
-                  >Password</label
-                >
-                <input
-                  type="password"
-                  class="form-control"
-                  id="exampleInputPassword1"
-                />
-              </div>
-              <div class="mb-3 form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="exampleCheck1"
-                />
-                <label class="form-check-label" for="exampleCheck1"
-                  >Check me out</label
-                >
-              </div>
+
               <button type="submit" class="btn btn-primary">Submit</button>
             </form>
           </div>
@@ -89,5 +71,8 @@
       integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
       crossorigin="anonymous"
     ></script>
+
+    <!-- My Scripts  -->
+    <script src="./scripts/formHandler.js"></script>
   </body>
 </html>
