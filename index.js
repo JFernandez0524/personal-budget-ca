@@ -1,34 +1,56 @@
-require('dotenv').config();
-const morgan = require('morgan');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const express = require('express');
+import 'dotenv/config';
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 const envelopes = [];
-const totalBudget = 0;
+let totalBudget = 0;
 
+// Middleware setup
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
-app.use(morgan('tiny'));
-app.use(cors);
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(morgan('dev'));
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 app.get('/envelopes', (req, res) => {
-  res.send('Here are the envelopes.s');
+  if (envelopes.length === 0) {
+    return res.status(404).send('No envelopes found.');
+  }
+
+  res.json(envelopes);
 });
 
 app.post('/envelopes', (req, res) => {
-  res.send('Post Request');
-});
+  const { name, amount } = req.body;
+  if (!name || !amount) {
+    return res.status(400).send('Name and amount are required.');
+  }
+  const numericAmount = Number(amount);
+  if (isNaN(numericAmount)) {
+    return res.status(400).send('Amount must be a valid number.');
+  }
 
-app.post('/envelopes/:name/:amount', (req, res) => {
-  const name = req.params.name;
-  const amount = req.params.amount;
+  if (
+    envelopes.some((envelope) => envelope.name === name) ||
+    envelopes.some((envelope) => envelope.amount === numericAmount)
+  ) {
+    return res
+      .status(400)
+      .send('Envelope with this name or amount already exists.');
+  }
+
+  const newEnvelope = { name, amount: numericAmount };
+  envelopes.push(newEnvelope);
+
+  envelopes.push({ name, amount });
+  res.send(`Envelope ${name} with amount ${amount} added.`);
 });
 
 app.listen(port, () => {
