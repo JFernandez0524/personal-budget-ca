@@ -1,0 +1,29 @@
+{
+  "envelopes": [
+    {
+      "id": 1,
+      "name": "Groceries",
+      "amount": 500
+    },
+    {
+      "id": 2,
+      "name": "Utilities",
+      "amount": 300
+    },
+    {
+      "id": 3,
+      "name": "Entertainment",
+      "amount": 200
+    },
+    {
+      "id": 4,
+      "name": "Savings",
+      "amount": 400
+    },
+    {
+      "id": 5,
+      "name": "Transportation",
+      "amount": 250
+    }
+  ]
+}

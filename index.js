@@ -2,55 +2,83 @@ import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import path from 'path';
 const app = express();
 const port = process.env.PORT || 3000;
 
-const envelopes = [];
-let totalBudget = 0;
+import envelopesRouter from './routes/envelopes.js';
+
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+// Serve static files from the 'public' directory
+app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(morgan('dev'));
 app.use(cors());
+// Use the envelopes router
+app.use('/envelopes', envelopesRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.get('/envelopes', (req, res) => {
-  if (envelopes.length === 0) {
-    return res.status(404).send('No envelopes found.');
-  }
-
-  res.json(envelopes);
-});
-
-app.post('/envelopes', (req, res) => {
+app.put('/envelopes/:name', (req, res) => {
+  const { name: envelopeName } = req.params;
   const { name, amount } = req.body;
-  if (!name || !amount) {
-    return res.status(400).send('Name and amount are required.');
-  }
-  const numericAmount = Number(amount);
-  if (isNaN(numericAmount)) {
-    return res.status(400).send('Amount must be a valid number.');
-  }
 
-  if (
-    envelopes.some((envelope) => envelope.name === name) ||
-    envelopes.some((envelope) => envelope.amount === numericAmount)
-  ) {
-    return res
-      .status(400)
-      .send('Envelope with this name or amount already exists.');
+  // Find the envelope by name
+  const envelopeIndex = envelopes.findIndex((env) => env.name === envelopeName);
+  // If the envelope does not exist, return a 404 error
+  if (envelopeIndex === -1) {
+    return res.status(404).send('Envelope not found.');
   }
 
-  const newEnvelope = { name, amount: numericAmount };
-  envelopes.push(newEnvelope);
+  // If the name is provided, update the envelope name
+  if (name) {
+    // Check if the new name already exists
+    if (
+      envelopes.some((env) => env.name === name && env.name !== envelopeName)
+    ) {
+      return res.status(400).send('Envelope with this name already exists.');
+    }
+    envelopes[envelopeIndex].name = name;
+  }
+  // If the amount is provided, update the envelope amount
+  if (amount !== undefined) {
+    // Validate the new amount
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      return res
+        .status(400)
+        .send('Amount must be a valid number greater than zero.');
+    }
+    // Check if the new amount exceeds the total budget limit
+    if (numericAmount > 1000) {
+      return res.status(400).send('Total budget cannot exceed $1000.');
+    }
 
-  envelopes.push({ name, amount });
-  res.send(`Envelope ${name} with amount ${amount} added.`);
+    // Validate input
+    if (!amount) {
+      return res.status(400).send('Amount is required.');
+    }
+
+    const envelope = envelopes.find((env) => env.name === name);
+    if (!envelope) {
+      return res.status(404).send('Envelope not found.');
+    }
+
+    // Update the total budget
+    totalBudget -= envelope.amount;
+    totalBudget += numericAmount;
+    envelope.amount = numericAmount;
+    res.send(`Envelope ${name} updated with new amount ${amount}.`);
+  }
 });
 
 app.listen(port, () => {
